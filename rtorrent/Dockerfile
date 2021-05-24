@@ -11,5 +11,4 @@ RUN mkdir -p /opt/rtorrent/download/seed
 RUN mkdir -p /opt/rtorrent/download/start
 COPY .rtorrent.rc /root/.rtorrent.rc
 EXPOSE 6890-6899
-# CMD ["/usr/bin/screen -d -m /usr/bin/rtorrent"]
-CMD ["bash"]
+CMD ["/usr/bin/screen -d -m /usr/bin/rtorrent"]

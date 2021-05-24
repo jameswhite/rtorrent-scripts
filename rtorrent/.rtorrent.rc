@@ -25,8 +25,8 @@ execute.throw = bash, -c, (cat,\
 #############################################################################
 
 # Listening port for incoming peer traffic (fixed; you can also randomize it)
-network.local_address.set = 136.58.104.44
-network.bind_address.set = 10.252.102.10
+network.local_address.set = 127.0.0.1
+network.bind_address.set = 127.0.0.1
 network.port_range.set = 6890-6999
 network.port_random.set = no
 
