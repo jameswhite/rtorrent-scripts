@@ -1,0 +1,2 @@
+#!/bin/bash
+docker run --rm -p 6969:6969 -it tracker

@@ -1,0 +1,165 @@
+#############################################################################
+# A minimal rTorrent configuration that provides the basic features
+# you want to have in addition to the built-in defaults.
+#
+# See https://github.com/rakshasa/rtorrent/wiki/CONFIG-Template
+# for an up-to-date version.
+#############################################################################
+
+#############################################################################
+# Instance layout (base paths) 
+#############################################################################
+method.insert = cfg.basedir,  private|const|string, (cat,"/opt/rtorrent/")
+method.insert = cfg.watch,    private|const|string, (cat,(cfg.basedir),"watch/")
+method.insert = cfg.download, private|const|string, (cat,(cfg.basedir),"download/")
+method.insert = cfg.logs,     private|const|string, (cat,(cfg.basedir),"log/")
+method.insert = cfg.logfile,  private|const|string, (cat,(cfg.logs),"rtorrent-",(system.time),".log")
+
+# Create instance directories
+execute.throw = bash, -c, (cat,\
+    "builtin cd \"", (cfg.basedir), "\" ",\
+    "&& mkdir -p .session download/{start,hit-and-run,seed} log watch/start")
+
+#############################################################################
+# Network / peer settings
+#############################################################################
+
+# Listening port for incoming peer traffic (fixed; you can also randomize it)
+network.local_address.set = 136.58.104.44
+network.bind_address.set = 10.252.102.10
+network.port_range.set = 6890-6999
+network.port_random.set = no
+
+# Tracker-less torrent and UDP tracker support
+# (conservative settings for 'private' trackers, change for 'public')
+dht.mode.set = disable
+protocol.pex.set = no
+trackers.use_udp.set = no
+
+# Peer settings
+throttle.max_uploads.set = 100
+throttle.max_uploads.global.set = 250
+
+throttle.min_peers.normal.set = 20
+throttle.max_peers.normal.set = 60
+throttle.min_peers.seed.set = 30
+throttle.max_peers.seed.set = 80
+trackers.numwant.set = 80
+
+protocol.encryption.set = allow_incoming,try_outgoing,enable_retry
+
+#############################################################################
+# System settings
+#############################################################################
+
+# Limits for file handle resources, this is optimized for
+# an `ulimit` of 1024 (a common default). You MUST leave
+# a ceiling of handles reserved for rTorrent's internal needs!
+network.http.max_open.set = 50
+network.max_open_files.set = 600
+network.max_open_sockets.set = 300
+
+# Memory resource usage (increase if you have a large number of items loaded,
+# and/or the available resources to spend)
+pieces.memory.max.set = 1800M
+network.xmlrpc.size_limit.set = 4M
+
+# Logging:
+#   Levels = critical error warn notice info debug
+#   Groups = connection_* dht_* peer_* rpc_* storage_* thread_* tracker_* torrent_*
+print = (cat, "Logging to ", (cfg.logfile))
+log.open_file = "log", (cfg.logfile)
+log.add_output = "info", "log"
+log.execute = (cat, (cfg.logs), "execute.log")
+# log.add_output = "tracker_debug", "log"
+
+#############################################################################
+# Basic operational settings (no need to change these)
+#############################################################################
+
+session.path.set = (cat, (cfg.basedir), ".session/")
+directory.default.set = (cat, (cfg.basedir), "download/")
+log.execute = (cat, (cfg.logs), "execute.log")
+# log.xmlrpc = (cat, (cfg.logs), "xmlrpc.log")
+execute.nothrow = bash, -c, (cat, "echo >",\
+    (session.path), "rtorrent.pid", " ", (system.pid))
+
+#############################################################################
+# Other operational settings (check & adapt)
+#############################################################################
+
+encoding.add = utf8
+system.umask.set = 0027
+system.cwd.set = (directory.default)
+network.http.dns_cache_timeout.set = 25
+# network.http.capath.set = "/etc/ssl/certs"
+# network.http.ssl_verify_peer.set = 0
+# network.http.ssl_verify_host.set = 0
+# pieces.hash.on_completion.set = no
+# keys.layout.set = qwerty
+
+# view.sort_current = seeding, greater=d.ratio=
+schedule2 = monitor_diskspace, 15, 60, ((close_low_diskspace, 1000M))
+
+#############################################################################
+# Custom workflow behavior
+#############################################################################
+
+# Some additional values and commands
+method.insert = system.startup_time, value|const, (system.time)
+method.insert = d.data_path, simple,"if=(d.is_multi_file),(cat, (d.directory), /),(cat, (d.directory), /, (d.name))"
+method.insert = d.session_file, simple, "cat=(session.path), (d.hash), .torrent"
+
+#############################################################################
+# Watch directory
+#############################################################################
+schedule2 = watch_start, 20, 10, "load.start_verbose=/opt/rtorrent/watch/start/*.torrent,d.directory.set=/opt/rtorrent/download/start,d.set_custom1=hit-and-run/"
+
+#############################################################################
+# Move complete torrents from start to hit-and-run
+#############################################################################
+method.insert  = d.get_finished_dir,   simple, "cat=/opt/rtorrent/download/,$d.custom1="
+method.insert  = d.get_data_full_path, simple, "branch=((d.is_multi_file)),((cat,(d.directory))),((cat,(d.directory),/,(d.name)))"
+method.insert  = d.move_to_complete,   simple, "execute=cp,-rp,$argument.0=,$argument.1=;d.stop=;d.directory.set=$argument.1=;d.start=;d.save_full_session=;execute=rm,-r,$argument.0="
+method.set_key=event.download.finished,move_complete,"d.move_to_complete=$d.get_data_full_path=,$d.get_finished_dir="
+# method.set_key=event.download.hash_done,move_complete,"d.move_to_complete=$d.get_data_full_path=,$d.get_finished_dir="
+
+#############################################################################
+# Delete the files associated with the torrent on delete *experimental*
+#############################################################################
+method.set_key = event.download.erased,delete_erased,"execute=rm,-rf,--,$d.base_path="
+
+#############################################################################
+# Add a "finished_delayed" event
+#
+# See https://github.com/rakshasa/rtorrent/issues/547
+#############################################################################
+
+# Delay in seconds (345600 is 96h)
+method.insert.value = event.download.finished_delayed.interval, 259200 
+
+# Add persistent view (queue holding delayed items)
+view.add = finished_delayed
+view.persistent = finished_delayed
+
+# Add new event for delayed completion handling
+method.insert = event.download.finished_delayed, multi|rlookup|static
+method.set_key = event.download.finished, !add_to_finished_delayed, \
+    "d.views.push_back_unique = finished_delayed ; \
+     view.filter_download = finished_delayed"
+method.set_key = event.download.finished_delayed, !remove_from_finished_delayed, \
+    "d.views.remove = finished_delayed ; \
+     view.filter_download = finished_delayed"
+
+# Call new event for items that passed the delay interval
+schedule2 = event.download.finished_delayed, 60, 60, \
+    ((d.multicall2, finished_delayed, \
+        "branch=\"elapsed.greater=(d.timestamp.finished),(event.download.finished_delayed.interval)\", \
+            event.download.finished_delayed="))
+
+# For debugging…
+method.set_key = event.download.finished_delayed, !debug, \
+    "print = \"DELAYED FINISH after \", (convert.elapsed_time, (d.timestamp.finished)), \
+             \" of \", (d.name)"
+
+### END of rtorrent.rc ###
