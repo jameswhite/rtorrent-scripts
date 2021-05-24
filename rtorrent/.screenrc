@@ -1,3 +1,0 @@
-autodetach on
-startup_message off
-screen -t 'rtorrent' 0 /usr/bin/rtorrent
