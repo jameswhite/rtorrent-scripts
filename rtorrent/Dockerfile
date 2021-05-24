@@ -10,5 +10,6 @@ RUN mkdir -p /opt/rtorrent/download/hit-and-run
 RUN mkdir -p /opt/rtorrent/download/seed
 RUN mkdir -p /opt/rtorrent/download/start
 COPY .rtorrent.rc /root/.rtorrent.rc
+COPY .screenrc /root/.screenrc
 EXPOSE 6890-6899
-CMD ["/usr/bin/screen -d -m /usr/bin/rtorrent"]
+CMD ["/usr/bin/screen"]
