@@ -9,6 +9,7 @@ sleep 5; screen -d -m
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
   mosquitto_pub -h mqtt -p 1883 -t "control" -m "ok to go"
+  EXIT=$?
   sleep 1
 done
 
