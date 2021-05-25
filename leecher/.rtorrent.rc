@@ -25,8 +25,8 @@ execute.throw = bash, -c, (cat,\
 #############################################################################
 
 # Listening port for incoming peer traffic (fixed; you can also randomize it)
-network.local_address.set = 127.0.0.1
-network.bind_address.set = 127.0.0.1
+network.local_address.set = 172.20.0.5
+network.bind_address.set = 172.20.0.5
 network.port_range.set = 6890-6999
 network.port_random.set = no
 
@@ -40,9 +40,9 @@ trackers.use_udp.set = no
 throttle.max_uploads.set = 100
 throttle.max_uploads.global.set = 250
 
-throttle.min_peers.normal.set = 20
+throttle.min_peers.normal.set = 1
 throttle.max_peers.normal.set = 60
-throttle.min_peers.seed.set = 30
+throttle.min_peers.seed.set = 1
 throttle.max_peers.seed.set = 80
 trackers.numwant.set = 80
 
