@@ -40,11 +40,11 @@ trackers.use_udp.set = no
 throttle.max_uploads.set = 100
 throttle.max_uploads.global.set = 250
 
-throttle.min_peers.normal.set = 1
-throttle.max_peers.normal.set = 1
-throttle.min_peers.seed.set = 1
-throttle.max_peers.seed.set = 1
-trackers.numwant.set = 1
+throttle.min_peers.normal.set = 20
+throttle.max_peers.normal.set = 60
+throttle.min_peers.seed.set = 30
+throttle.max_peers.seed.set = 80
+trackers.numwant.set = 80
 
 protocol.encryption.set = allow_incoming,try_outgoing,enable_retry
 
