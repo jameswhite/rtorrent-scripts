@@ -6,7 +6,11 @@ sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorren
 sleep 5; screen -d -m
 
 # Wait for the leecher to come up
-mosquitto_sub -h mqtt -p 1883 -t "control" -C 1
+EXIT=14
+while [ ${EXIT} -ne 0 ]; do
+  mosquitto_sub -h mqtt -p 1883 -t "control" -C 1
+  sleep 1
+done
 
 # Create our torrent
 /bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240
