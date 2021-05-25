@@ -11,10 +11,12 @@ RUN mkdir -p /opt/rtorrent/download/start
 RUN mkdir -p /opt/rtorrent/watch/seed
 # RUN /bin/dd if=/dev/urandom of=/opt/rtorrent/download/hit-and-run/torrentfile bs=512 count=10240
 # RUN /usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /opt/rtorrent/watch/start/torrentfile.torrent /opt/rtorrent/download/hit-and-run/torrentfile
-COPY .rtorrent.rc /root/.rtorrent.rc
+# mosquitto_pub -h mqtt -t torrent -m "$(cat /opt/rtorrent/watch/start/torrentfile.torrent | base64 -w 0)"
+COPY .rtorrent.rc /root/.rtorrent.rc.tpl
 COPY .screenrc /root/.screenrc
+COPY work /root/work
 EXPOSE 6890-6899
-CMD ["/bin/bash"]
+CMD ["/root/work"]
 #
 
 # docker cp rtorrent-scripts_seeder_1:/opt/rtorrent/watch/start/torrentfile.torrent .

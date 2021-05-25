@@ -1,0 +1,19 @@
+#!/bin/bash
+# ensure we're binding to the right, arbitrarily assigned IP
+sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
+
+# start screen detached, which will fire up rtorrent
+sleep 5; screen -d -m
+
+# Wait for the leecher to come up
+mosquitto_sub -h mqtt -p 1883 -t "control" -C 1
+
+# Create our torrent
+/bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240
+/usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /opt/rtorrent/watch/start/torrentfile.torrent /opt/rtorrent/download/start/torrentfile
+
+# send the torrent to the leecher
+mosquitto_pub -h mqtt -t torrent -m "$(cat /opt/rtorrent/watch/start/torrentfile.torrent | base64 -w 0)"
+
+# wait forever
+/bin/bash

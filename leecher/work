@@ -1,0 +1,15 @@
+#!/bin/bash
+# ensure we're binding to the right, arbitrarily assigned IP
+sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
+
+# start screen detached, which will fire up rtorrent
+sleep 5; screen -d -m
+
+# let the seeder know we up
+mosquitto_pub -h mqtt -p 1883 -t "control" -m "ok to go"
+
+# wait for the seeder to send us our torrent file
+mosquitto_sub -h mqtt -t "torrent" -C 1 | base64 -d > /opt/rtorrent/watch/start/torrentfile.torrent
+
+# wait forever
+/bin/bash
