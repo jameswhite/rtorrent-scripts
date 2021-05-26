@@ -1,2 +1,5 @@
 #### Usage
-docker-compose up --build --remove-orphans
+```
+docker-compose up --build --force-recreate --remove-orphans
+
+```
