@@ -30,5 +30,10 @@ transmission-show /tmp/torrentfile.torrent && mv /tmp/torrentfile.torrent /opt/r
 # send the torrent to the leecher
 mosquitto_pub -h mqtt -t torrent -m "$(cat /opt/rtorrent/watch/start/torrentfile.torrent | base64 -w 0)"
 
-# wait forever
-/bin/bash
+# wait for the download to complete then exit
+EXIT=1
+while [ ${EXIT} -ne 0 ]; do
+  mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 | grep "^download completed$"
+  EXIT=$?
+  sleep 3
+done

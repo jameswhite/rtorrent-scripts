@@ -30,7 +30,6 @@ while [ ! -f /opt/rtorrent/download/hit-and-run/torrentfile ]; do
   mosquitto_pub -h mqtt -p 1883 -t "test" -r -m "still waiting on download to complete"
   sleep 10
 done
-mosquitto_pub -h mqtt -p 1883 -t "test" -r -m "download completed"
 
-# wait forever
-/bin/bash
+# let the containers know we're done and exit
+mosquitto_pub -h mqtt -p 1883 -t "finish" -m "download completed"
