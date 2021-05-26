@@ -6,7 +6,7 @@ echo "screen -x" > /root/.bash_history
 # let the seeder know we up, persist the message in case the seeder isn't awake yet, this message gets it all rolling
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
-  mosquitto_pub -h mqtt -p 1883 -t "control" -r -m "ok to go"
+  mosquitto_pub -h mqtt -p 1883 -t "control" -r -m "ok to go" 2>/dev/null
   EXIT=$?
   sleep 1
 done

@@ -6,7 +6,7 @@ echo "screen -x" > /root/.bash_history
 # Wait for the leecher to come up
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
-  mosquitto_sub -h mqtt -p 1883 -t "control" -C 1 | grep -q "ok to go"
+  mosquitto_sub -h mqtt -p 1883 -t "control" -C 1 2>/dev/null | grep -q "ok to go" 
   EXIT=$?
   sleep 1
 done

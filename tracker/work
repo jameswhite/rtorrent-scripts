@@ -4,7 +4,7 @@
 # wait for the download to complete then exit
 EXIT=1
 while [ ${EXIT} -ne 0 ]; do
-  mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 | grep -q "^download completed$"
+  mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 2>/dev/null | grep -q "^download completed$"
   EXIT=$?
   sleep 3
 done
