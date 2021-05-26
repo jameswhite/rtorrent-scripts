@@ -1,7 +1,7 @@
 #!/bin/bash
 # ensure we're binding to the right, arbitrarily assigned IP
 sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
-echo "screen -x" > /root/.bash_history"
+echo "screen -x" > "/root/.bash_history"
 
 # let the seeder know we up, persist the message in case the seeder isn't awake yet, this message gets it all rolling
 EXIT=14
