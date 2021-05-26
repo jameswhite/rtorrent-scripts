@@ -31,6 +31,6 @@ while [ ! -f /opt/rtorrent/download/hit-and-run/torrentfile ]; do
   sleep 10
 done
 
-ls -l /opt/rtorrent/download/hit-and-run/torrentfile
+sha1sum /opt/rtorrent/download/hit-and-run/torrentfile
 # let the containers know we're done and exit
 mosquitto_pub -h mqtt -p 1883 -t "finish" -m "download completed"

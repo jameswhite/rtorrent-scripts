@@ -23,7 +23,7 @@ echo ${EXIT} > /var/log/screen.exit
 
 # Create our torrent
 /bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240 > /dev/null 2>&1
-ls -l /opt/rtorrent/download/start/torrentfile
+sha1sum /opt/rtorrent/download/start/torrentfile
 [ -f /opt/rtorrent/watch/start/torrentfile.torrent ] && rm -f /opt/rtorrent/watch/start/torrentfile.torrent
 /usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /tmp/torrentfile.torrent /opt/rtorrent/download/start/torrentfile > /dev/null 2>&1
 transmission-show /tmp/torrentfile.torrent > /dev/null 2>&1 && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
