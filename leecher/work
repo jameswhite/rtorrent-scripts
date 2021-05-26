@@ -5,10 +5,10 @@ sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorren
 # start screen detached, which will fire up rtorrent
 sleep 5; screen -d -m
 
-# let the seeder know we up
+# let the seeder know we up, persist the message in case the seeder isn't awake yet, this message gets it all rolling
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
-  mosquitto_pub -h mqtt -p 1883 -t "control" -m "ok to go"
+  mosquitto_pub -h mqtt -p 1883 -t "control" -r -m "ok to go"
   EXIT=$?
   sleep 1
 done
