@@ -15,6 +15,7 @@ done
 
 # Create our torrent
 /bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240
+[ -f /opt/rtorrent/watch/start/torrentfile.torrent ] && rm -f /opt/rtorrent/watch/start/torrentfile.torrent
 /usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /opt/rtorrent/watch/start/torrentfile.torrent /opt/rtorrent/download/start/torrentfile
 
 # send the torrent to the leecher

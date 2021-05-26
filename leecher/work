@@ -13,8 +13,9 @@ while [ ${EXIT} -ne 0 ]; do
   sleep 1
 done
 
-# wait for the seeder to send us our torrent file
-mosquitto_sub -h mqtt -t "torrent" -C 1 | base64 -d > /opt/rtorrent/watch/start/torrentfile.torrent
+# wait for the seeder to send us our torrent file, but don't try to start a download on an empty file
+mosquitto_sub -h mqtt -t "torrent" -C 1 | base64 -d > /tmp/torrentfile.torrent
+transmission-show /tmp/torrentfile.torrent && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
 
 # wait forever
 /bin/bash
