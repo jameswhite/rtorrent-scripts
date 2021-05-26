@@ -6,7 +6,7 @@ echo "screen -x" > /root/.bash_history
 # Wait for the leecher to come up
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
-  mosquitto_sub -h mqtt -p 1883 -t "control" -C 1
+  mosquitto_sub -h mqtt -p 1883 -t "control" -C 1 | grep -q "ok to go"
   EXIT=$?
   sleep 1
 done
@@ -22,7 +22,8 @@ done
 echo ${EXIT} > /var/log/screen.exit
 
 # Create our torrent
-/bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240
+/bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240 > /dev/null 2>&1
+ls -l /opt/rtorrent/download/start/torrentfile
 [ -f /opt/rtorrent/watch/start/torrentfile.torrent ] && rm -f /opt/rtorrent/watch/start/torrentfile.torrent
 /usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /tmp/torrentfile.torrent /opt/rtorrent/download/start/torrentfile > /dev/null 2>&1
 transmission-show /tmp/torrentfile.torrent > /dev/null 2>&1 && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
