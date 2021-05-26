@@ -2,9 +2,6 @@
 # ensure we're binding to the right, arbitrarily assigned IP
 sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
 
-# start screen detached, which will fire up rtorrent
-sleep 5; screen -d -m
-
 # let the seeder know we up, persist the message in case the seeder isn't awake yet, this message gets it all rolling
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
@@ -12,6 +9,16 @@ while [ ${EXIT} -ne 0 ]; do
   EXIT=$?
   sleep 1
 done
+
+# start screen detached, which will fire up rtorrent
+ps -ef | grep -v grep | grep SCREEN
+EXIT=$?
+while [ ${EXIT} -ne 0 ]; do
+  screen -d -m > /var/log/screen.log 2>&1
+  EXIT=$?
+  sleep 1
+done
+echo ${EXIT} > /var/log/screen.exit
 
 # wait for the seeder to send us our torrent file, but don't try to start a download on an empty file
 mosquitto_sub -h mqtt -t "torrent" -C 1 | base64 -d > /tmp/torrentfile.torrent

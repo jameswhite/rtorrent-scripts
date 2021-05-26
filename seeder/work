@@ -2,9 +2,6 @@
 # ensure we're binding to the right, arbitrarily assigned IP
 sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
 
-# start screen detached, which will fire up rtorrent
-sleep 5; screen -d -m
-
 # Wait for the leecher to come up
 EXIT=14
 while [ ${EXIT} -ne 0 ]; do
@@ -13,10 +10,21 @@ while [ ${EXIT} -ne 0 ]; do
   sleep 1
 done
 
+# start screen detached, which will fire up rtorrent
+ps -ef | grep -v grep | grep SCREEN
+EXIT=$?
+while [ ${EXIT} -ne 0 ]; do
+  screen -d -m > /var/log/screen.log 2>&1
+  EXIT=$?
+  sleep 1
+done
+echo ${EXIT} > /var/log/screen.exit
+
 # Create our torrent
 /bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240
 [ -f /opt/rtorrent/watch/start/torrentfile.torrent ] && rm -f /opt/rtorrent/watch/start/torrentfile.torrent
-/usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /opt/rtorrent/watch/start/torrentfile.torrent /opt/rtorrent/download/start/torrentfile
+/usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /tmp/torrentfile.torrent /opt/rtorrent/download/start/torrentfile
+transmission-show /tmp/torrentfile.torrent && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
 
 # send the torrent to the leecher
 mosquitto_pub -h mqtt -t torrent -m "$(cat /opt/rtorrent/watch/start/torrentfile.torrent | base64 -w 0)"
