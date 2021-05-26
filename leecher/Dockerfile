@@ -2,7 +2,7 @@ FROM scratch
 ADD rootfs.tar.xz /
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y procps net-tools vim screen rtorrent mktorrent mosquitto-clients
+RUN apt-get install -y procps net-tools vim screen rtorrent mktorrent mosquitto-clients transmission-cli
 RUN mkdir -p /opt/rtorrent/log
 RUN mkdir -p /opt/rtorrent/watch
 RUN mkdir -p /opt/rtorrent/download

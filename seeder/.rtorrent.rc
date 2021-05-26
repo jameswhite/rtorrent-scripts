@@ -118,7 +118,7 @@ schedule2 = watch_start, 20, 10, "load.start_verbose=/opt/rtorrent/watch/start/*
 #############################################################################
 # Move complete torrents from start to hit-and-run
 #############################################################################
-method.insert  = d.get_finished_dir,   simple, "cat=/opt/rtorrent/download/,$d.custom1.get=/"
+method.insert  = d.get_finished_dir,   simple, "cat=/opt/rtorrent/download/,$d.custom1=/"
 method.insert  = d.get_data_full_path, simple, "branch=((d.is_multi_file)),((cat,(d.directory))),((cat,(d.directory),/,(d.name)))"
 method.insert  = d.move_to_complete,   simple, "execute=cp,-rp,$argument.0=,$argument.1=;d.stop=;d.directory.set=$argument.1=;d.start=;d.save_full_session=;execute=rm,-r,$argument.0="
 method.set_key=event.download.finished,move_complete,"d.move_to_complete=$d.get_data_full_path=,$d.get_finished_dir="
@@ -136,7 +136,7 @@ method.set_key = event.download.erased,delete_erased,"execute=rm,-rf,--,$d.base_
 #############################################################################
 
 # Delay in seconds (345600 is 96h)
-method.insert.value = event.download.finished_delayed.interval, 259200 
+method.insert.value = event.download.finished_delayed.interval, 259200
 
 # Add persistent view (queue holding delayed items)
 view.add = finished_delayed
