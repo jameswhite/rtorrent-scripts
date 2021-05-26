@@ -1,7 +1,7 @@
 #!/bin/bash
 # ensure we're binding to the right, arbitrarily assigned IP
 sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
-echo "screen -x" > "/root/.bash_history"
+echo "screen -x" > /root/.bash_history
 
 # let the seeder know we up, persist the message in case the seeder isn't awake yet, this message gets it all rolling
 EXIT=14
@@ -24,6 +24,13 @@ echo ${EXIT} > /var/log/screen.exit
 # wait for the seeder to send us our torrent file, but don't try to start a download on an empty file
 mosquitto_sub -h mqtt -t "torrent" -C 1 | base64 -d > /tmp/torrentfile.torrent
 transmission-show /tmp/torrentfile.torrent && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
+
+# wait for the file to finish downloading and get moved
+while [ ! -f /opt/rtorrent/download/hit-and-run/torrentfile ]; do
+  mosquitto_pub -h mqtt -p 1883 -t "test" -r -m "still waiting on download to complete"
+  sleep 10
+done
+mosquitto_pub -h mqtt -p 1883 -t "test" -r -m "download completed"
 
 # wait forever
 /bin/bash

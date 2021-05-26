@@ -13,5 +13,5 @@ COPY .rtorrent.rc /root/.rtorrent.rc.tpl
 COPY .screenrc /root/.screenrc
 COPY work /root/work
 EXPOSE 6890-6899
-CMD ["/root/work"]
+CMD ["/root/work",">","/var/log/work.log","2>&1"]
 # mosquitto_sub -h mqtt -t "torrent" -C 1 | base64 -d > /opt/rtorrent/watch/start/torrentfile.torrent

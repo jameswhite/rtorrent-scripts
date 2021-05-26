@@ -16,7 +16,7 @@ COPY .rtorrent.rc /root/.rtorrent.rc.tpl
 COPY .screenrc /root/.screenrc
 COPY work /root/work
 EXPOSE 6890-6899
-CMD ["/root/work"]
+CMD ["/root/work",">","/var/log/work.log","2>&1"]
 #
 
 # docker cp rtorrent-scripts_seeder_1:/opt/rtorrent/watch/start/torrentfile.torrent .
