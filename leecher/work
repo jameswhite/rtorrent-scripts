@@ -1,4 +1,6 @@
 #!/bin/bash
+DEBUG="true"
+unset DEBUG
 # ensure we're binding to the right, arbitrarily assigned IP
 sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
 echo "screen -x" > /root/.bash_history
@@ -39,13 +41,15 @@ while [ ! -f /opt/rtorrent/download/seed/torrentfile ]; do
 done
 sha1sum /opt/rtorrent/download/seed/torrentfile
 
+if [ ! -z "${DEBUG}" ]; then
 # wait for the download to complete then exit (normally we send this but this is for debugging, send it from your workstation)
-# EXIT=1
-# while [ ${EXIT} -ne 0 ]; do
-#   mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 | grep -q "^download completed$"
-#   EXIT=$?
-#   sleep 3
-# done
-
-# let the containers know we're done and exit (uncomment when not debugging containers)
-mosquitto_pub -h mqtt -p 1883 -t "finish" -m "download completed"
+  EXIT=1
+  while [ ${EXIT} -ne 0 ]; do
+    mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 | grep -q "^download completed$"
+    EXIT=$?
+    sleep 3
+  done
+else
+  # let the containers know we're done and exit (uncomment when not debugging containers)
+  mosquitto_pub -h mqtt -p 1883 -t "finish" -m "download completed"
+fi
