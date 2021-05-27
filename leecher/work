@@ -2,6 +2,7 @@
 # ensure we're binding to the right, arbitrarily assigned IP
 sed -e "s/~HOSTNAME_I~/$(hostname -i)/g" /root/.rtorrent.rc.tpl > /root/.rtorrent.rc
 echo "screen -x" > /root/.bash_history
+echo -e "syntax on\nset background=dark" > /root/.vimrc
 
 # let the seeder know we up, persist the message in case the seeder isn't awake yet, this message gets it all rolling
 EXIT=14
@@ -31,6 +32,20 @@ while [ ! -f /opt/rtorrent/download/hit-and-run/torrentfile ]; do
   sleep 10
 done
 
-sha1sum /opt/rtorrent/download/hit-and-run/torrentfile
-# let the containers know we're done and exit
+# wait for the file to finish hit-and-run and get moved to seed
+while [ ! -f /opt/rtorrent/download/seed/torrentfile ]; do
+  mosquitto_pub -h mqtt -p 1883 -t "test" -r -m "still waiting on hit-and-run to expire"
+  sleep 10
+done
+sha1sum /opt/rtorrent/download/seed/torrentfile
+
+# wait for the download to complete then exit (normally we send this but this is for debugging, send it from your workstation)
+# EXIT=1
+# while [ ${EXIT} -ne 0 ]; do
+#   mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 | grep -q "^download completed$"
+#   EXIT=$?
+#   sleep 3
+# done
+
+# let the containers know we're done and exit (uncomment when not debugging containers)
 mosquitto_pub -h mqtt -p 1883 -t "finish" -m "download completed"
