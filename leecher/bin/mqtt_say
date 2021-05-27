@@ -1,0 +1,4 @@
+#!/bin/bash
+TOPIC="$1"
+shift 1
+/usr/bin/mosquitto_pub -h mqtt -p 1883 -t ${TOPIC} -m "$*"

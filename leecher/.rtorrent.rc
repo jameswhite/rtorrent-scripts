@@ -132,6 +132,8 @@ method.insert  = d.move_to_hnr,   simple, "execute=cp,-rp,$argument.0=,$argument
 
 method.set_key = event.download.finished,move_hnr,"d.move_to_hnr=$d.get_data_full_path=,$d.get_hnr_dir="
 
+method.insert  = d.notify_mqtt,   simple, "execute=mqtt_say,$argument.0=,$argument.1="
+method.set_key = event.download.finished,mqtt_hnr,"d.notify_mqtt=\"rtorrent\",(cat,\"moving to hit-and-run: \",$d.get_data_full_path=)"
 
 #############################################################################
 # Delete the files associated with the torrent on delete *experimental*
@@ -144,9 +146,9 @@ method.set_key = event.download.erased,delete_erased,"execute=rm,-rf,--,$d.base_
 # See https://github.com/rakshasa/rtorrent/issues/547
 #############################################################################
 
-# Delay in seconds (345600 is 96h, 20s is for the test suite)
+# Delay in seconds (345600 is 96h, 30s is for the test suite)
 # method.insert.value = event.download.finished_delayed.interval, 345600
-method.insert.value = event.download.finished_delayed.interval, 20
+method.insert.value = event.download.finished_delayed.interval, 30
 
 # Add persistent view (queue holding delayed items)
 view.add = finished_delayed
@@ -170,6 +172,7 @@ method.insert  = d.get_finished_dir,   simple, "cat=/opt/rtorrent/download/,$d.c
 method.insert  = d.get_data_finished_path, simple, "branch=((d.is_multi_file)),((cat,(d.directory))),((cat,(d.directory),/,(d.name)))"
 method.insert  = d.move_to_seed,   simple, "execute=cp,-rp,$argument.0=,$argument.1=;d.stop=;d.directory.set=$argument.1=;d.start=;d.save_full_session=;execute=rm,-r,$argument.0="
 method.set_key = event.download.finished_delayed,move_finished,"d.move_to_seed=$d.get_data_finished_path=,$d.get_finished_dir="
+method.set_key = event.download.finished_delayed,mqtt_hnr,"d.notify_mqtt=\"rtorrent\",(cat,\"moving to seed: \",$d.get_data_full_path=)"
 
 # For debugging…
 method.set_key = event.download.finished_delayed, !debug, "print = \"DELAYED FINISH after \", (convert.elapsed_time, (d.timestamp.finished)), \" of \", (d.name)"
