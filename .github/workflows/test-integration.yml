@@ -1,7 +1,11 @@
 version: "2"
 on: [push, pull_request]
-jobs: 
+jobs:
   build:
+    runs-on: scratch
+    timeout-minutes: 3
     steps:
-      name: test
-      run docker-compose up --build --force-recreate --remove-orphans --exit-code-from leecher
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Test
+        run: docker-compose up --build --force-recreate --remove-orphans --exit-code-from leecher
