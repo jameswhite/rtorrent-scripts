@@ -26,7 +26,7 @@ echo ${EXIT} > /var/log/screen.exit
 sha1sum /opt/rtorrent/download/start/torrentfile
 [ -f /opt/rtorrent/watch/start/torrentfile.torrent ] && rm -f /opt/rtorrent/watch/start/torrentfile.torrent
 /usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /tmp/torrentfile.torrent /opt/rtorrent/download/start/torrentfile > /dev/null 2>&1
-transmission-show /tmp/torrentfile.torrent > /dev/null 2>&1 && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
+transmission-show /tmp/torrentfile.torrent > /dev/null 2>&1 && [ -s /tmp/torrentfile.torrent ] && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
 
 # send the torrent to the leecher
 mosquitto_pub -h mqtt -t torrent -m "$(cat /opt/rtorrent/watch/start/torrentfile.torrent | base64 -w 0)"
