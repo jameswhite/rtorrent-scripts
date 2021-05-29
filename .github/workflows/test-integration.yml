@@ -1,7 +1,7 @@
 on: [push, pull_request]
 jobs:
   build:
-    runs-on: scratch
+    runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
       - name: Checkout
