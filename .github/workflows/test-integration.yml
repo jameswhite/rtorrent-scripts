@@ -1,6 +1,6 @@
 on: pull_request
 jobs:
-  build:
+  integration-build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
