@@ -1,0 +1,7 @@
+version: "2"
+on: [push, pull_request]
+jobs: 
+  build:
+    steps:
+      name: test
+      run docker-compose up --build --force-recreate --remove-orphans --exit-code-from leecher
