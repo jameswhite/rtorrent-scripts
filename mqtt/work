@@ -1,10 +1,16 @@
 #!/bin/bash
 /usr/sbin/mosquitto -d > /var/log/mosquitto.stdout 2>/var/log/mosquitto.stderr
+sleep 2
 
 # wait for the download to complete then exit
 EXIT=1
-while [ ${EXIT} -ne 0 ]; do
-  mosquitto_sub -h mqtt -p 1883 -t "finish" -C 1 | grep -q "^download completed$"
-  EXIT=$?
-  sleep 3
+mosquitto_sub -h mqtt -p 1883 -t "#" | while read LINE; do
+   echo "mqtt_log: ${LINE}"
+   echo "${LINE}" | /bin/grep -q "^download completed$"
+   EXIT=$?
+   if [ ${EXIT} -eq 0 ]; then
+     # this is crazy that it won't exit without this :neutral_face:
+     pkill mosquitto_sub
+   fi
 done
+echo "exited."

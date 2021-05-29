@@ -25,7 +25,11 @@ echo ${EXIT} > /var/log/screen.exit
 /bin/dd if=/dev/urandom of=/opt/rtorrent/download/start/torrentfile bs=512 count=10240 > /dev/null 2>&1
 sha1sum /opt/rtorrent/download/start/torrentfile
 [ -f /opt/rtorrent/watch/start/torrentfile.torrent ] && rm -f /opt/rtorrent/watch/start/torrentfile.torrent
-/usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /tmp/torrentfile.torrent /opt/rtorrent/download/start/torrentfile > /dev/null 2>&1
+
+while [ ! -f /tmp/torrentfile.torrent ]; do
+  /usr/bin/mktorrent -v -p -a http://$(dig +short tracker):6969/announce -o /tmp/torrentfile.torrent /opt/rtorrent/download/start/torrentfile > /dev/null 2>&1
+  sleep 2
+done
 transmission-show /tmp/torrentfile.torrent > /dev/null 2>&1 && mv /tmp/torrentfile.torrent /opt/rtorrent/watch/start/torrentfile.torrent
 
 # send the torrent to the leecher
