@@ -5,7 +5,7 @@ sleep 2
 # wait for the download to complete then exit
 EXIT=1
 mosquitto_sub -h mqtt -p 1883 -t "#" | while read LINE; do
-   echo "mqtt_log: ::${LINE}::"
+   echo "mqtt_log: ${LINE}"
    echo "${LINE}" | /bin/grep -q "^download completed$"
    EXIT=$?
    if [ ${EXIT} -eq 0 ]; then
